@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Simon</string>
+    <string name="canc">Cancel</string>
+    <string name="fine">End Game</string>
+</resources>

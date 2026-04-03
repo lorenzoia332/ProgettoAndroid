@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Simon</string>
+    <string name="canc">Cancella</string>
+    <string name="fine">Fine Partita</string>
+</resources>
