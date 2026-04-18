@@ -176,12 +176,12 @@ fun Portrait_layout(colori: Int, testo: String, aggTesto: (String) -> Unit, canc
 
             Button(onClick = {
 
-                //termino la partita solo se esiste una sequenza di colori da passare altrimenti non faccio terminare
-                if(!testo.isEmpty()) {
+
+                //if(!testo.isEmpty()) {
                     aggPartite(testo)  //passo la stringa
                     cancTesto("")       // faccio il 'clear' del testo
                     onFineClicked()     // vado alla nuova schermata
-                }
+                //}
             }, modifier = Modifier.padding(horizontal = 10.dp)) {
                 Text( stringResource(R.string.fine))
             }
@@ -270,11 +270,11 @@ fun Landscape_layout(colori: Int, testo: String, aggTesto: (String) -> Unit, can
                 }
 
                 Button(onClick = {
-                    if(!testo.isEmpty()) {
+                    //if(!testo.isEmpty()) {
                         aggPartite(testo) // salvo il contenuto da passare
                         cancTesto("")   // pulisco la casella di testo
                         onFineClicked()  //passo alla schermata di elenco delle partite
-                    }
+                    //}
                 },
                     modifier = Modifier.padding(horizontal = 10.dp)) {
                     Text( stringResource(R.string.fine))

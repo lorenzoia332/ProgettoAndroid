@@ -99,7 +99,7 @@ fun Elementi_Lista(s: String){
 
 
 
-        Text((s.length/2 +1).toString() , modifier = myModifier
+        Text((s.length/2 +s.length%2).toString() , modifier = myModifier
             .weight(1f),
             style = TextStyle(
                 fontFamily = FontFamily.SansSerif,
