@@ -5,6 +5,8 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,9 +16,11 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -31,10 +35,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.simon.ui.theme.Blue
 import com.example.simon.ui.theme.Cyan
 import com.example.simon.ui.theme.Green
@@ -43,6 +52,15 @@ import com.example.simon.ui.theme.Red
 import com.example.simon.ui.theme.Yellow
 import kotlinx.coroutines.delay
 
+
+
+private val myBackModifier = Modifier
+    .background(Color(0xFF000000))
+private val myTextModifier = Modifier
+    .clip(shape = CutCornerShape(8.dp))
+    .background(Color(0xAAFFFFFF))
+    .border(1.dp,Color.White, CutCornerShape(8.dp))
+    .padding(horizontal = 20.dp, vertical = 10.dp)
 @Composable
 fun SchermataPrincipale(onFineClicked: () -> Unit , partite: List<String>, aggPartite: (String) -> Unit) {
 
@@ -100,7 +118,7 @@ fun Portrait_layout(colori: Int, testo: String, aggTesto: (String) -> Unit, canc
 
 
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(modifier = myBackModifier.fillMaxSize()) {
 
         Box(modifier = Modifier
             .weight(2f)
@@ -132,7 +150,14 @@ fun Portrait_layout(colori: Int, testo: String, aggTesto: (String) -> Unit, canc
             .weight(1f)
             .padding(16.dp),
             contentAlignment = Alignment.Center){
-            Text(testo)
+            Text(testo,
+                modifier = myTextModifier,
+                color = Color.Black,
+                style = TextStyle(
+                    fontFamily = FontFamily.SansSerif,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                ))
         }
         Row(modifier = Modifier
             .weight(1f)
@@ -150,8 +175,13 @@ fun Portrait_layout(colori: Int, testo: String, aggTesto: (String) -> Unit, canc
             }
 
             Button(onClick = {
-                aggPartite(testo)
-                onFineClicked()
+
+                //termino la partita solo se esiste una sequenza di colori da passare altrimenti non faccio terminare
+                if(!testo.isEmpty()) {
+                    aggPartite(testo)  //passo la stringa
+                    cancTesto("")       // faccio il 'clear' del testo
+                    onFineClicked()     // vado alla nuova schermata
+                }
             }, modifier = Modifier.padding(horizontal = 10.dp)) {
                 Text( stringResource(R.string.fine))
             }
@@ -163,7 +193,10 @@ fun Portrait_layout(colori: Int, testo: String, aggTesto: (String) -> Unit, canc
 
 @Composable
 fun Landscape_layout(colori: Int, testo: String, aggTesto: (String) -> Unit, cancTesto: (String) -> Unit, onFineClicked: () -> Unit, aggPartite: (String) -> Unit){
-    Row(modifier = Modifier.fillMaxSize()) {
+    Row(modifier = myBackModifier
+        .safeDrawingPadding() // per evitare che la fotocamera interna del dispositivo sovrapponga le bande nere alla grafica dell'UI
+        .fillMaxWidth()
+        .fillMaxHeight()) {
         //box a sx con la griglia occupa mezza schermata
         Box(modifier = Modifier
             .weight(2f)
@@ -212,7 +245,14 @@ fun Landscape_layout(colori: Int, testo: String, aggTesto: (String) -> Unit, can
                     .padding(16.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(testo)
+                Text(testo,
+                    modifier = myTextModifier,
+                    color = Color.Black,
+                    style = TextStyle(
+                        fontFamily = FontFamily.SansSerif,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    ))
             }
             Row(
                 modifier = Modifier
@@ -230,8 +270,11 @@ fun Landscape_layout(colori: Int, testo: String, aggTesto: (String) -> Unit, can
                 }
 
                 Button(onClick = {
-                    aggPartite(testo)
-                    onFineClicked()
+                    if(!testo.isEmpty()) {
+                        aggPartite(testo) // salvo il contenuto da passare
+                        cancTesto("")   // pulisco la casella di testo
+                        onFineClicked()  //passo alla schermata di elenco delle partite
+                    }
                 },
                     modifier = Modifier.padding(horizontal = 10.dp)) {
                     Text( stringResource(R.string.fine))
@@ -303,7 +346,8 @@ fun Elementi_Griglia(id :Int, isActive: Boolean, testo: String, onUpdate: (Strin
     },
         shape = formaAnimata,
         modifier = Modifier
-            .size(100.dp)
+            .size(90.dp)
+            .border(1.dp, Color.White, formaAnimata)
             .padding(8.dp),
         contentPadding = PaddingValues(0.dp),
         colors = ButtonDefaults.buttonColors(c, contentColor = Color.White),

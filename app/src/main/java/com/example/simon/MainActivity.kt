@@ -6,11 +6,15 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
+import androidx.core.view.WindowCompat
 
 
 import androidx.navigation.compose.NavHost
@@ -34,13 +38,21 @@ class MainActivity : ComponentActivity() {
 
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        WindowCompat.setDecorFitsSystemWindows(window,false)
         setContent {
             SimonTheme {
 
                 val navController = rememberNavController()
-                var listaPartite = rememberSaveable {mutableListOf<String>()}
+                val listaPartite = rememberSaveable(
+                    saver = listSaver(
+                        save = { it.toList() },
+                        restore = {it.toMutableStateList()}
+                    )
+                ) {
+                    mutableStateListOf<String>()
+                }
 
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                Scaffold(contentWindowInsets = WindowInsets(0,0,0,0)) { innerPadding ->
                     NavHost(
                         navController = navController, startDestination = "principale",
                         modifier = Modifier.padding((innerPadding))
