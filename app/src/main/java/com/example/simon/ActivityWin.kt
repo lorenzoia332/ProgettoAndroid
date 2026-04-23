@@ -85,13 +85,6 @@ fun PartiteLandscape(listaPartite: List<String>){
     }
 }
 
-/*
-@Composable
-@Preview
-fun Previv(){
-    PartiteLandscape(listaPartite = List(1,{"A,B,C"}))
-}
-*/
 
 @Composable
 fun Elementi_Lista(s: String){
@@ -116,8 +109,8 @@ fun Elementi_Lista(s: String){
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
             ),
-                    maxLines = 1,
-            overflow = TextOverflow.Ellipsis)
+                    maxLines = 1,//definisce il numero di Linee di testo, massimo 1 in questo caso
+            overflow = TextOverflow.Ellipsis) // gestisce le stringe troppo lunghe troncando la stringa e inserendo "..."
 
 
     }

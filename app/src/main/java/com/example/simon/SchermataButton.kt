@@ -29,7 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
+//import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -64,34 +64,44 @@ private val myTextModifier = Modifier
 @Composable
 fun SchermataPrincipale(onFineClicked: () -> Unit , partite: List<String>, aggPartite: (String) -> Unit) {
 
-    val sequenzaColori = rememberSaveable {
-        mutableStateListOf<Int>()
-    }
-    var livello by rememberSaveable { mutableIntStateOf(1) }
+    //val sequenzaColori = rememberSaveable { mutableStateListOf<Int>() }
+    var livello by rememberSaveable { mutableIntStateOf(1) } // è lo stato che definisce il proseguire dei livelli per una futura configurazione
 
 
 
-    var indiceColori by rememberSaveable {
+    var indiceColori by rememberSaveable { // definsce l' attivazione di un tasto per l' implementazione dei livelli
         mutableIntStateOf(-1)
     }
+
+    /*
+    é il testo della sequenza di pulsanti premuti, mantiene la stringa che appare all' utente in tempo reale , ed è
+    l' elemento base che definisce una partita
+     */
     var testoEsposto by rememberSaveable { mutableStateOf("") }
 
+    /*
+    LaunchedEffect definisce un comportamento che avviene alla modifica di livello, per ora imposta lo stato iniziale del testo
+     */
     LaunchedEffect(livello) {
 
-        repeat(6) { sequenzaColori.add((1..6).random()) }
+        //repeat(6) { sequenzaColori.add((1..6).random()) }
 
         delay(1000)
 
-        for(colore in sequenzaColori){
-            indiceColori = colore
-            delay(600)
-            indiceColori = -1
-            delay(300)
+       // for(colore in sequenzaColori){
+        //    indiceColori = colore
+        //    delay(600)
+        //    indiceColori = -1
+        //    delay(300)
+        //}
+        if(testoEsposto.isEmpty()){ // altrimenti ad ogni cambio di configurazione il testo viene resettato cosi invece manteniamo il dato correttamente
+            testoEsposto = ""
         }
-        testoEsposto = ""
     }
 
-
+    /*
+    Questo if gestisce il cambio di configurazione da portrait a landscape della schermata 1
+     */
     if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
 
         Portrait_layout(indiceColori, testo = testoEsposto,
@@ -112,7 +122,17 @@ fun SchermataPrincipale(onFineClicked: () -> Unit , partite: List<String>, aggPa
 
 
 
-
+/*
+ * @Colori definsce l'attivazione dei pulsanti per un implementazione dei livelli
+ * @testo è la Stringa che definisce la partita
+ * @aggTesto è la lamda function che permette di modificare il testo aggiungendo un elemento
+ * @canTesto imposta il testo ad una stringa passata, viene eusato per il reset
+ * @onFineClicked permette di attivare la navigazione da schermata1 a schermata 2
+ * @aggPartite aggiunge testo alla lista di partite
+ *
+ *
+ * vale lo stesso per Landscape_layout
+ */
 @Composable
 fun Portrait_layout(colori: Int, testo: String, aggTesto: (String) -> Unit, cancTesto: (String)-> Unit ,onFineClicked: () -> Unit, aggPartite: (String) -> Unit){
 
@@ -288,7 +308,14 @@ fun Landscape_layout(colori: Int, testo: String, aggTesto: (String) -> Unit, can
     }
 }
 
-
+/*
+ * Funzione che definisce gli elementi che formano i pulsanti colorati
+ * ogni pulsante ha un:
+ * @id un valore Int che lo identifica
+ * @isActive che dice al pulsante se è attivo, per un aniamzione
+ * @testo necessaria per l' aggiornamento della variabile
+ * @onUpdate per aggiungere il singolo elemento alla stringa testo
+ */
 @Composable
 fun Elementi_Griglia(id :Int, isActive: Boolean, testo: String, onUpdate: (String) -> Unit) {
     var c = Color(0xFF000000)
