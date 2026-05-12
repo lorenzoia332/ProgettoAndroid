@@ -62,7 +62,7 @@ private val myTextModifier = Modifier
     .border(1.dp,Color.White, CutCornerShape(8.dp))
     .padding(horizontal = 20.dp, vertical = 10.dp)
 @Composable
-fun SchermataPrincipale(onFineClicked: () -> Unit , partite: List<String>, aggPartite: (String) -> Unit) {
+fun SchermataPrincipale(onFineClicked: () -> Unit , state: PartitaState, aggPartite: (String, String) -> Unit) {
 
     //val sequenzaColori = rememberSaveable { mutableStateListOf<Int>() }
     var livello by rememberSaveable { mutableIntStateOf(1) } // è lo stato che definisce il proseguire dei livelli per una futura configurazione
@@ -122,7 +122,7 @@ fun SchermataPrincipale(onFineClicked: () -> Unit , partite: List<String>, aggPa
 
 
 
-/*
+/**
  * @Colori definsce l'attivazione dei pulsanti per un implementazione dei livelli
  * @testo è la Stringa che definisce la partita
  * @aggTesto è la lamda function che permette di modificare il testo aggiungendo un elemento
@@ -134,7 +134,7 @@ fun SchermataPrincipale(onFineClicked: () -> Unit , partite: List<String>, aggPa
  * vale lo stesso per Landscape_layout
  */
 @Composable
-fun Portrait_layout(colori: Int, testo: String, aggTesto: (String) -> Unit, cancTesto: (String)-> Unit ,onFineClicked: () -> Unit, aggPartite: (String) -> Unit){
+fun Portrait_layout(colori: Int, testo: String, aggTesto: (String) -> Unit, cancTesto: (String)-> Unit ,onFineClicked: () -> Unit, aggPartite: (String, String) -> Unit){
 
 
 
@@ -196,9 +196,12 @@ fun Portrait_layout(colori: Int, testo: String, aggTesto: (String) -> Unit, canc
 
             Button(onClick = {
 
+                val sc = "A-B-C"
+                val sg = "A-C-D"
+
 
                 //if(!testo.isEmpty()) {
-                    aggPartite(testo)  //passo la stringa
+                    aggPartite(sc,sg)  //passo la stringa
                     cancTesto("")       // faccio il 'clear' del testo
                     onFineClicked()     // vado alla nuova schermata
                 //}
@@ -212,7 +215,7 @@ fun Portrait_layout(colori: Int, testo: String, aggTesto: (String) -> Unit, canc
 
 
 @Composable
-fun Landscape_layout(colori: Int, testo: String, aggTesto: (String) -> Unit, cancTesto: (String) -> Unit, onFineClicked: () -> Unit, aggPartite: (String) -> Unit){
+fun Landscape_layout(colori: Int, testo: String, aggTesto: (String) -> Unit, cancTesto: (String) -> Unit, onFineClicked: () -> Unit, aggPartite: (String, String) -> Unit){
     Row(modifier = myBackModifier
         .safeDrawingPadding() // per evitare che la fotocamera interna del dispositivo sovrapponga le bande nere alla grafica dell'UI
         .fillMaxWidth()
@@ -290,8 +293,10 @@ fun Landscape_layout(colori: Int, testo: String, aggTesto: (String) -> Unit, can
                 }
 
                 Button(onClick = {
+                    val sc = "A-B-C"
+                    val sg = "A-C-D"
                     //if(!testo.isEmpty()) {
-                        aggPartite(testo) // salvo il contenuto da passare
+                        aggPartite(sc,sg) // salvo il contenuto da passare
                         cancTesto("")   // pulisco la casella di testo
                         onFineClicked()  //passo alla schermata di elenco delle partite
                     //}
@@ -308,7 +313,7 @@ fun Landscape_layout(colori: Int, testo: String, aggTesto: (String) -> Unit, can
     }
 }
 
-/*
+/**
  * Funzione che definisce gli elementi che formano i pulsanti colorati
  * ogni pulsante ha un:
  * @id un valore Int che lo identifica
