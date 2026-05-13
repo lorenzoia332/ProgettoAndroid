@@ -11,19 +11,32 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/**
+ *@param PartitaViewModel è la calsse che definisce il ViewModel,
+ *  il comportamento dello stato e l' implementazione delle funzionalità
+ *
+ * @param _sortType è una variabile per salvare l'attuale ordinamento di visualizzazione
+ * @param _partite è la lista di partite giàa ordianta sencondo il sortType
+ * @param _state è una lista degli stati della partita
+ *
+ * @param state è un osservatore/ascoltatore attivo dei cambiamenti
+ * @property onEvent definisce il modo di rispondere ad un dato evento
+ */
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class PartitaViewModel(
     private val dao: PartitaDao
 ): ViewModel() {
 
 
-    private val _sortType = MutableStateFlow(SortType.ASC)
+    private val _sortType = MutableStateFlow(SortType.ID_DESC)
 
     private val _partite = _sortType
         .flatMapLatest { sortType ->
             when(sortType){
-                SortType.ASC -> dao.getPartiteOrderByIdASC()
-                SortType.DESC -> dao.getPartiteOrderByIdDESC()
+                SortType.ID_ASC -> dao.getPartiteOrderByIdASC()
+                SortType.ID_DESC -> dao.getPartiteOrderByIdDESC()
+                SortType.LEN_DESC -> dao.getPartiteOrderByLenDESC()
             }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
@@ -49,15 +62,16 @@ class PartitaViewModel(
                 }
 
             }
-            PartitaEvent.HideDialog -> {
+            is PartitaEvent.HideDialog -> {
                 _state.update { it.copy(
                     isAddingPartita = false
                 ) }
             }
-            PartitaEvent.SavePartita -> {
+            is PartitaEvent.SavePartita -> {
 
                 val rightSeq = state.value.rightSeq
                 val playerSeq = state.value.playerSeq
+                val rightLen = state.value.rightLen
 
                 if(rightSeq.isBlank() || playerSeq.isBlank()){
                     return
@@ -65,7 +79,8 @@ class PartitaViewModel(
 
                 val partita  = Partita(
                     rightSeq = rightSeq,
-                    playerSeq = playerSeq
+                    playerSeq = playerSeq,
+                    rightLen = rightLen
                 )
                 viewModelScope.launch {
                     dao.upsertPartita(partita)
@@ -73,7 +88,9 @@ class PartitaViewModel(
                 _state.update { it.copy(
                     isAddingPartita = false,
                     rightSeq = "",
-                    playerSeq = ""
+                    playerSeq = "",
+                    rightLen = 0
+
                 ) }
 
 
@@ -95,6 +112,12 @@ class PartitaViewModel(
             }
             is PartitaEvent.SortPartite -> {
                 _sortType.value = event.sortType
+            }
+
+            is PartitaEvent.SetRightLen -> {
+                _state.update {it.copy(
+                    rightLen = event.rightLen
+                ) }
             }
         }
     }
