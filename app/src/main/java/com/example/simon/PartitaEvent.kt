@@ -11,6 +11,9 @@ package com.example.simon
  * @property HideDialog
  * @property SortPartite per definire l'ordine nel quale le partite vengono visualizzate
  * @property DeletePartita per eliminare una partita
+ * @property StartLivello inizia il nuovo livello e avviala sequenza
+ * @property TastoGiocoPremuto per gestire i tasti premuti dal giocatore
+ * @property ResetGioco Per reimpostare lo stato iniziale prima del livello "Nuova Partita"
  */
 sealed interface PartitaEvent {
 
@@ -41,4 +44,12 @@ sealed interface PartitaEvent {
      * @param partita di tipo Partita
      */
     data class DeletePartita(val partita: Partita): PartitaEvent
+
+
+
+    object  StartLivello: PartitaEvent
+
+    data class TastoGiocoPremuto(val carattere: Char): PartitaEvent
+
+    object ResetGioco: PartitaEvent
 }

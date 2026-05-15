@@ -2,6 +2,9 @@ package com.example.simon
 
 import androidx.room3.Dao
 import androidx.room3.Delete
+import androidx.room3.Insert
+import androidx.room3.OnConflictStrategy
+import androidx.room3.OnConflictStrategy.Companion.IGNORE
 import androidx.room3.Query
 import androidx.room3.Upsert
 import kotlinx.coroutines.flow.Flow
@@ -10,7 +13,7 @@ import kotlinx.coroutines.flow.Flow
  * @param PartitaDao è l'interfaccia che permette di eseguire le operazioni sul database,
  *                      definita come DAO Data Access Object
  *
- * @property upsertPartita permette di inserire/aggiornare una partita
+ * @property insertPartita permette di inserire/aggiornare una partita
  * @property deletePartita permette di cancellare una partita (non richiesto nella consegna)
  * @property getPartiteOrderByIdASC permette di ottenere una lista di partite dalla più vecchia alla più recente
  * @property getPartiteOrderByIdDESC permette di ottenere una lista di partite dalla più recente alla più vecchia
@@ -19,8 +22,9 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface PartitaDao {
 
-    @Upsert
-    suspend fun upsertPartita(partita: Partita)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insertPartita(partita: Partita)
+
 
     @Delete
     suspend fun deletePartita(partita: Partita)

@@ -36,11 +36,22 @@ android {
     buildFeatures {
         compose = true
     }
+
+
+
+    configurations.configureEach {
+        resolutionStrategy.dependencySubstitution {
+            substitute(module("com.intellij:annotations"))
+                .using(module("org.jetbrains:annotations:23.0.0"))
+                .because("Avoid duplicate classes conflict")
+        }
+    }
 }
 
 dependencies {
     implementation(libs.androidx.room3.runtime)
     implementation(libs.androidx.room3.common.jvm)
+    implementation(libs.androidx.room3.compiler)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -54,6 +65,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.camera.camera2.pipe)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

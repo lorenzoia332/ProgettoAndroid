@@ -4,6 +4,8 @@ package com.example.simon
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -40,13 +43,12 @@ import androidx.compose.ui.unit.sp
 
 @Preview
 @Composable
-fun PrevSchermata(){
-    val p = Partita(rightSeq = "A-B-C", playerSeq = "A-C-D")
+fun PrevSchermata() {
+    val p = Partita(rightSeq = "A-B-C", playerSeq = "A-C-D", rightLen = 1)
     val ps = PartitaState(listOf(p), rightSeq = "A-B-C", playerSeq = "A-C-D")
-    PartitePortrait(ps,  { })
+    PartitePortrait(ps, {}, {} )
 
 }
-
 
 private val myModifier = Modifier
     .clip(shape = CutCornerShape(8.dp))
@@ -55,20 +57,20 @@ private val myModifier = Modifier
     .padding(horizontal = 20.dp, vertical = 10.dp)
 
 @Composable
-fun SchermataPartite(state: PartitaState, onStartClick: () -> Unit){
+fun SchermataPartite(state: PartitaState, onEvent: (PartitaEvent) -> Unit, onStartClick: () -> Unit){
 
 
 
     if(LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT){
-        PartitePortrait(state , onStartClick)
-    }else PartiteLandscape(state , onStartClick)
+        PartitePortrait(state , onEvent, onStartClick  )
+    }else PartiteLandscape(state , onEvent, onStartClick)
 }
 
 
 
 
 @Composable
-fun PartitePortrait(state: PartitaState, onStartClick: () -> Unit){
+fun PartitePortrait(state: PartitaState, onEvent: (PartitaEvent) -> Unit, onStartClick: () -> Unit){
     Scaffold(Modifier
         .background(Color.Black), {},{},{},
         {
@@ -91,7 +93,7 @@ fun PartitePortrait(state: PartitaState, onStartClick: () -> Unit){
 
         , contentPadding = innerPadding) {
             items(state.partite) { partita ->
-                Elementi_Lista(partita.rightSeq, partita.playerSeq)
+                Elementi_Lista(partita)
 
             }
 
@@ -103,18 +105,18 @@ fun PartitePortrait(state: PartitaState, onStartClick: () -> Unit){
 
 
 @Composable
-fun PartiteLandscape(state: PartitaState , onStartClick: () -> Unit){
+fun PartiteLandscape(state: PartitaState, onEvent: (PartitaEvent) -> Unit, onStartClick: () -> Unit){
 
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .windowInsetsPadding(WindowInsets.safeDrawing)
-            .background(Color(0x00, 0x00, 0x00))
+            .background(Color(0x00, 0x00, 0x00)),
+
 
     ) {
         items(state.partite) { partita ->
-            Elementi_Lista(partita.rightSeq, partita.playerSeq
-            )
+            Elementi_Lista(partita)
 
         }
 
@@ -128,7 +130,10 @@ fun PartiteLandscape(state: PartitaState , onStartClick: () -> Unit){
 
 
 @Composable
-fun Elementi_Lista(s: String , sg: String){
+fun Elementi_Lista(partita: Partita){
+
+    val s = partita.rightSeq
+    val sg = partita.playerSeq
     var i = 0
     val t= buildAnnotatedString {
         for( c in sg){
@@ -150,34 +155,40 @@ fun Elementi_Lista(s: String , sg: String){
     }
 
 
-    Row{
+    Row(detModifier
+            .clickable() {  },
+        Arrangement.Center,
+        Alignment.CenterVertically,
+        {
 
 
+                Text(
+                    i.toString(), modifier = myModifier
+                        .weight(1f),
+                    style = TextStyle(
+                        fontFamily = FontFamily.SansSerif,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
 
-        Text(i.toString() , modifier = myModifier
-            .weight(1f),
-            style = TextStyle(
-                fontFamily = FontFamily.SansSerif,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
-            )
+                )
 
-            )
-
-        Text(t , modifier = myModifier
-            .weight(3f),
-            style = TextStyle(
-                fontFamily = FontFamily.SansSerif,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
-            ),
+                Text(
+                    t, modifier = myModifier
+                        .weight(3f),
+                    style = TextStyle(
+                        fontFamily = FontFamily.SansSerif,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    ),
                     maxLines = 1,//definisce il numero di Linee di testo, massimo 1 in questo caso
-            overflow = TextOverflow.Ellipsis) // gestisce le stringe troppo lunghe troncando la stringa e inserendo "..."
+                    overflow = TextOverflow.Ellipsis
+                ) // gestisce le stringe troppo lunghe troncando la stringa e inserendo "..."
 
 
-    }
-
+            })
 }
+
 
 
 

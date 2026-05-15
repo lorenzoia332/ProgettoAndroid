@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">Simon</string>
     <string name="canc">Cancel</string>
-    <string name="fine">End Game</string>
+    <string name="fine">END GAME</string>
     <string name="caso_vuoto">Please, enter the color sequence</string>
+    <string name="inizia">START GAME</string>
+    <string name="pausa">PAUSE</string>
+    <string name="riprendi">RESUME</string>
 </resources>
