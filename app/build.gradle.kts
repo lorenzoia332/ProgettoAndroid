@@ -1,7 +1,9 @@
+import org.gradle.kotlin.dsl.support.compileKotlinScriptModuleForPrecompiledScriptPluginsTo
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
-
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -19,7 +21,16 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-
+    /*
+    sourceSets{
+        getByName("main") {
+            java.srcDirs("build/generated/ksp/main/kotlin", "build/generated/ksp/main/java")
+        }
+        getByName("debug") {
+            java.srcDirs("build/generated/ksp/debug/kotlin", "build/generated/ksp/debug/java")
+        }
+    }
+     */
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -51,7 +62,7 @@ android {
 dependencies {
     implementation(libs.androidx.room3.runtime)
     implementation(libs.androidx.room3.common.jvm)
-    implementation(libs.androidx.room3.compiler)
+    ksp(libs.androidx.room3.compiler)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

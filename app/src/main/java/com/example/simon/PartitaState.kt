@@ -21,5 +21,8 @@ data class PartitaState(
     val isAddingPartita: Boolean = false,
     val sortType: SortType = SortType.ID_DESC,
     val activeButtonIndex: Int = -1,
-    val cpuPhase : Boolean = false
+    val cpuPhase : Boolean = false,
+    val isPartitaStarted: Boolean = false,
+    val isPartitaOnPause: Boolean = false,
+    val interruptedSequenceIndex: Int = 0
 )

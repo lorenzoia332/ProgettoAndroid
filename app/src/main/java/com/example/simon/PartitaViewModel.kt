@@ -1,5 +1,6 @@
 package com.example.simon
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -26,6 +27,8 @@ import kotlin.random.Random
  * @property onEvent definisce il modo di rispondere ad un dato evento
  */
 
+
+private val TAG = "VIEW_MODEL_LOG"
 @OptIn(ExperimentalCoroutinesApi::class)
 class PartitaViewModel(
     private val dao: PartitaDao
@@ -59,12 +62,52 @@ class PartitaViewModel(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), PartitaState())
 
 
-    init {
-        onEvent(PartitaEvent.StartLivello)
-    }
+
 
     fun onEvent(event: PartitaEvent){
         when(event) {
+            is PartitaEvent.StartPartita->{
+                if(_state.value.isPartitaStarted) return
+
+                _state.update { it.copy(
+                    isPartitaStarted = true,
+                    rightSeq = "",
+                    playerSeq = "",
+                    rightLen = 0
+                ) }
+
+                newLevel()
+            }
+
+            is PartitaEvent.PausePartita->{
+                if(!_state.value.isPartitaStarted) return
+
+                val newPause = !_state.value.isPartitaOnPause
+
+                _state.update { it.copy(isPartitaOnPause = newPause) }
+
+                if(!newPause && _state.value.cpuPhase){
+                    viewModelScope.launch {
+                        playSequence(_state.value.rightSeq)
+                    }
+                } else {
+                    _state.update { it.copy(activeButtonIndex = -1) }
+                }
+            }
+
+            is PartitaEvent.EndPartita -> {
+
+                val havePlay = _state.value.playerSeq.isNotEmpty()
+
+                val isNotFirstLevel = _state.value.rightLen > 1
+
+                if (havePlay && isNotFirstLevel){
+                    onEvent(PartitaEvent.SavePartita)
+                } else {
+                    _state.update { PartitaState() }
+                }
+            }
+
             is PartitaEvent.StartLivello -> {
                 viewModelScope.launch {
                     val newCarattere = coloriGioco[Random.nextInt(coloriGioco.size)]
@@ -90,8 +133,8 @@ class PartitaViewModel(
                 }
             }
 
-            is PartitaEvent.TastoGiocoPremuto -> {
-                if (_state.value.cpuPhase) return
+            is PartitaEvent.PressedButton -> {
+                if (_state.value.cpuPhase || _state.value.isPartitaOnPause || !_state.value.isPartitaStarted) return
 
                 val pressChar = event.carattere
                 val listaRightSeq = _state.value.rightSeq.split("-")
@@ -107,7 +150,7 @@ class PartitaViewModel(
 
                 //controllo che  ogni tasto premuto sia corretto rispetto alla sequenza del livello altrimenti termino
                 if (pressChar.toString() != listaRightSeq[tempIndex]) {
-                    onEvent(PartitaEvent.ShowDialog)
+                    onEvent(PartitaEvent.SavePartita)
                     return
                 }
 
@@ -124,24 +167,10 @@ class PartitaViewModel(
                 if (checkRight.size == listaRightSeq.size) {
                     viewModelScope.launch {
                         delay(600)
-                        onEvent(PartitaEvent.StartLivello)
+                        newLevel()
                     }
                 }
             }
-
-            is PartitaEvent.ResetGioco -> {
-                _state.update {
-                    it.copy(
-                        rightSeq = "",
-                        playerSeq = "",
-                        rightLen = 0,
-                        activeButtonIndex = -1,
-                        cpuPhase = false
-                    )
-                }
-                onEvent(PartitaEvent.StartLivello)
-            }
-
 
             is PartitaEvent.DeletePartita -> {
                 viewModelScope.launch {
@@ -159,6 +188,9 @@ class PartitaViewModel(
             }
 
             is PartitaEvent.SavePartita -> {
+                Log.v(TAG, "save partita ${state.value.rightSeq}")
+                Log.v(TAG, "save partita ${state.value.playerSeq}")
+                Log.v(TAG, "save partita ${state.value.rightLen}")
 
                 val rightSeq = state.value.rightSeq
                 val playerSeq = state.value.playerSeq
@@ -177,18 +209,8 @@ class PartitaViewModel(
                     dao.insertPartita(partita)
                 }
                 _state.update {
-                    it.copy(
-                        isAddingPartita = false,
-                        rightSeq = "",
-                        playerSeq = "",
-                        rightLen = 0
-
-                    )
+                    PartitaState()
                 }
-
-                onEvent(PartitaEvent.StartLivello)
-
-
             }
 
             is PartitaEvent.SetPlayerSeq -> {
@@ -228,6 +250,31 @@ class PartitaViewModel(
         }
     }
 
+
+    private  fun newLevel(){
+        val newCar = coloriGioco[Random.nextInt(coloriGioco.size)]
+
+        val activeSequence = _state.value.rightSeq
+
+        val nerRightSeq = if(activeSequence.isEmpty()){
+            "$newCar"
+        } else {
+            "$activeSequence-$newCar"
+        }
+
+        _state.update { it.copy(
+            rightSeq = nerRightSeq,
+            playerSeq = "",
+            rightLen = nerRightSeq.split("-").size,
+            cpuPhase = true,
+            interruptedSequenceIndex = 0
+        ) }
+
+        viewModelScope.launch {
+            playSequence(nerRightSeq)
+        }
+    }
+
     private suspend fun playSequence(sequenza : String){
 
         if (sequenza.isEmpty())return
@@ -235,21 +282,27 @@ class PartitaViewModel(
         val elementi = sequenza.split("-")
         delay(1000)
 
-        for(e in elementi){
-            if(e.isBlank())continue
-            val c = e[0]
-            val idTasto = cToId(c)
+        while (_state.value.interruptedSequenceIndex < elementi.size &&  !_state.value.isPartitaOnPause){
+             val i = _state.value.interruptedSequenceIndex
+            val e = elementi[i]
 
-            _state.update {it.copy(activeButtonIndex = idTasto)}
+            if(e.isNotBlank()){
+                val idButton = cToId(e[0])
 
-            delay(600)
+                _state.update { it.copy(activeButtonIndex = idButton) }
+                delay(600)
+                _state.update { it.copy(activeButtonIndex = -1) }
+                delay(250)
+            }
 
-            _state.update { it.copy(activeButtonIndex = -1) }
-
-            delay(250)
+            if (!_state.value.isPartitaOnPause){
+                _state.update {it.copy(interruptedSequenceIndex = i+1)}
+            }
         }
 
-        _state.update { it.copy(cpuPhase = false) }
+        if (_state.value.interruptedSequenceIndex >= elementi.size){
+            _state.update { it.copy(cpuPhase = false) }
+        }
 
     }
 

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.safeDrawing
@@ -46,7 +47,7 @@ import androidx.compose.ui.unit.sp
 fun PrevSchermata() {
     val p = Partita(rightSeq = "A-B-C", playerSeq = "A-C-D", rightLen = 1)
     val ps = PartitaState(listOf(p), rightSeq = "A-B-C", playerSeq = "A-C-D")
-    PartitePortrait(ps, {}, {} )
+    PartitePortrait(ps, {}, {}, onPartitaClick = {} )
 
 }
 
@@ -57,24 +58,24 @@ private val myModifier = Modifier
     .padding(horizontal = 20.dp, vertical = 10.dp)
 
 @Composable
-fun SchermataPartite(state: PartitaState, onEvent: (PartitaEvent) -> Unit, onStartClick: () -> Unit){
-
-
+fun SchermataPartite(state: PartitaState, onEvent: (PartitaEvent) -> Unit, onStartClick: () -> Unit , onPartitaClick: (Int) -> Unit) {
 
     if(LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT){
-        PartitePortrait(state , onEvent, onStartClick  )
-    }else PartiteLandscape(state , onEvent, onStartClick)
+        PartitePortrait(state , onEvent, onStartClick,  onPartitaClick )
+    }else PartiteLandscape(state , onEvent, onStartClick, onPartitaClick )
 }
 
 
 
 
 @Composable
-fun PartitePortrait(state: PartitaState, onEvent: (PartitaEvent) -> Unit, onStartClick: () -> Unit){
-    Scaffold(Modifier
-        .background(Color.Black), {},{},{},
-        {
-            FloatingActionButton( onStartClick,
+fun PartitePortrait(state: PartitaState, onEvent: (PartitaEvent) -> Unit, onStartClick: () -> Unit, onPartitaClick: (Int) -> Unit){
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        containerColor = Color.Black,
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onStartClick,
                 containerColor = Color.White,
                 contentColor = Color.Black,
                 shape = FloatingActionButtonDefaults.shape) {
@@ -83,55 +84,62 @@ fun PartitePortrait(state: PartitaState, onEvent: (PartitaEvent) -> Unit, onStar
                     contentDescription = "")
 
         }
-        }, floatingActionButtonPosition = FabPosition.End) { innerPadding ->
+        }, floatingActionButtonPosition = FabPosition.End
+    ) { innerPadding ->
 
         LazyColumn(
             modifier = Modifier
-                .background(Color.Black)
-                .windowInsetsPadding(WindowInsets.safeDrawing)
                 .fillMaxSize()
-
-        , contentPadding = innerPadding) {
+                .background(Color.Black)
+                .windowInsetsPadding(WindowInsets.safeDrawing),
+            contentPadding = innerPadding
+        ) {
             items(state.partite) { partita ->
-                Elementi_Lista(partita)
+                Elementi_Lista(partita, onClick = {onPartitaClick(partita.id)} )
+            }
+        }
+    }
+}
+
+
+@Composable
+fun PartiteLandscape(state: PartitaState, onEvent: (PartitaEvent) -> Unit, onStartClick: () -> Unit, onPartitaClick: (Int) -> Unit){
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        containerColor = Color.Black,
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onStartClick,
+                containerColor = Color.White,
+                contentColor = Color.Black,
+                modifier = Modifier.safeContentPadding()) {
+
+                Icon(painter = painterResource(R.drawable.play_arrow_24px),
+                    contentDescription = "")
+
+            }
+        }, floatingActionButtonPosition = FabPosition.End
+    ) { innerPadding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .windowInsetsPadding(WindowInsets.safeDrawing)
+                .background(Color.Black),
+            contentPadding = innerPadding
+            ) {
+            items(state.partite) { partita ->
+                Elementi_Lista(partita, onClick = {onPartitaClick(partita.id)})
 
             }
 
         }
 
-
     }
 }
 
 
 @Composable
-fun PartiteLandscape(state: PartitaState, onEvent: (PartitaEvent) -> Unit, onStartClick: () -> Unit){
-
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .windowInsetsPadding(WindowInsets.safeDrawing)
-            .background(Color(0x00, 0x00, 0x00)),
-
-
-    ) {
-        items(state.partite) { partita ->
-            Elementi_Lista(partita)
-
-        }
-
-    }
-
-    FloatingActionButton(modifier = Modifier
-        .safeContentPadding(),
-        onClick = onStartClick
-    ) { }
-}
-
-
-@Composable
-fun Elementi_Lista(partita: Partita){
-
+fun Elementi_Lista(partita: Partita , onClick:() -> Unit){
     val s = partita.rightSeq
     val sg = partita.playerSeq
     var i = 0
@@ -148,45 +156,45 @@ fun Elementi_Lista(partita: Partita){
             i++
         }
     }
-    i = if(s.length == sg.length){
-        (s.length/2 + s.length%2) // stesso lunghezza e caratteri
-    }else{
-        (s.length/2 + s.length%2) - 1
-    }
+
+    val punteggio = partita.rightLen
 
 
-    Row(detModifier
-            .clickable() {  },
+    Row(modifier = Modifier
+        .fillMaxWidth()
+        .padding(vertical = 4.dp, horizontal = 8.dp)
+            .clickable {  onClick() },
         Arrangement.Center,
-        Alignment.CenterVertically,
-        {
+        Alignment.CenterVertically) {
 
 
-                Text(
-                    i.toString(), modifier = myModifier
-                        .weight(1f),
-                    style = TextStyle(
-                        fontFamily = FontFamily.SansSerif,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+        Text(
+            text = punteggio.toString(),
+            modifier = myModifier
+                .weight(1.2f),
+            style = TextStyle(
+                fontFamily = FontFamily.SansSerif,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold
+            ),
+            color = Color.Black
 
-                )
+        )
 
-                Text(
-                    t, modifier = myModifier
-                        .weight(3f),
-                    style = TextStyle(
-                        fontFamily = FontFamily.SansSerif,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    ),
-                    maxLines = 1,//definisce il numero di Linee di testo, massimo 1 in questo caso
-                    overflow = TextOverflow.Ellipsis
-                ) // gestisce le stringe troppo lunghe troncando la stringa e inserendo "..."
-
-
-            })
+        Text(
+            text = t,
+            modifier = myModifier
+                .weight(3f),
+            style = TextStyle(
+                fontFamily = FontFamily.SansSerif,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            ),
+            maxLines = 1,//definisce il numero di Linee di testo, massimo 1 in questo caso
+            overflow = TextOverflow.Ellipsis,
+            color = Color.Black
+        ) // gestisce le stringe troppo lunghe troncando la stringa e inserendo "..."
+    }
 }
 
 

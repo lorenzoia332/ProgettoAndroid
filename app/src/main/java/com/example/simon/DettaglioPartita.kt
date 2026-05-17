@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.sp
 val detModifier = Modifier.background(Color.White)
 
 @Composable
-fun PartitaDetail(state: PartitaState, id: Int){
+fun DettaglioPartita(state: PartitaState, id: Int){
     val sc = state.partite[id].rightSeq.split("-")
 
 
@@ -147,5 +147,5 @@ fun ElementoDettaglioPartita(len: Int,sc: String, sg: String){
 @Composable
 fun PrevDett(){
 
-    PartitaDetail(PartitaState(partite = listOf(Partita(rightSeq = "A-B-C" , playerSeq = "A-B-D", rightLen = 3))),0)
+    DettaglioPartita(PartitaState(partite = listOf(Partita(rightSeq = "A-B-C" , playerSeq = "A-B-D", rightLen = 3))),0)
 }

@@ -49,7 +49,10 @@ sealed interface PartitaEvent {
 
     object  StartLivello: PartitaEvent
 
-    data class TastoGiocoPremuto(val carattere: Char): PartitaEvent
+    data class PressedButton(val carattere: Char): PartitaEvent
 
-    object ResetGioco: PartitaEvent
+    object StartPartita: PartitaEvent
+    object PausePartita: PartitaEvent
+    object EndPartita: PartitaEvent
+
 }

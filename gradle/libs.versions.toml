@@ -17,6 +17,7 @@ room3Runtime = "3.0.0-alpha04"
 material3 = "1.4.0"
 cameraCamera2Pipe = "1.6.1"
 lifecycleViewmodelKtx = "2.10.0"
+ksp = "2.0.0-1.0.21"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -46,4 +47,5 @@ androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifec
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 

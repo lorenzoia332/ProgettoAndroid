@@ -38,6 +38,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.simon.ui.theme.Blue
@@ -46,6 +47,8 @@ import com.example.simon.ui.theme.Green
 import com.example.simon.ui.theme.Magenta
 import com.example.simon.ui.theme.Red
 import com.example.simon.ui.theme.Yellow
+
+
 
 
 /**
@@ -94,7 +97,7 @@ fun SchermataPrincipale(onFineClicked: () -> Unit , state: PartitaState, aggPart
  * Layout per la versione PORTRAIT
  */
 @Composable
-fun Portrait_layout(state: PartitaState,onFineClicked: () -> Unit, aggPartite: (PartitaEvent) -> Unit){
+fun Portrait_layout(state: PartitaState, onFineClicked: () -> Unit, aggPartite: (PartitaEvent) -> Unit){
 
 
 
@@ -117,7 +120,7 @@ fun Portrait_layout(state: PartitaState,onFineClicked: () -> Unit, aggPartite: (
                         state = state,
                         isActive = (state.activeButtonIndex == idButton),
                         onPress = {carattere ->
-                            aggPartite(PartitaEvent.TastoGiocoPremuto(carattere))
+                            aggPartite(PartitaEvent.PressedButton(carattere))
                         })
                 }
 
@@ -144,27 +147,40 @@ fun Portrait_layout(state: PartitaState,onFineClicked: () -> Unit, aggPartite: (
             .padding(16.dp),
             horizontalArrangement = Arrangement.Absolute.Center
         ){
-
+            //INIZIO PARTITA
             Button(onClick = {
-                aggPartite(PartitaEvent.StartLivello)},
-                modifier = Modifier.padding(horizontal = 10.dp)) {
-                Icon(painter = painterResource(R.drawable.play_arrow_24px),
-                    contentDescription = stringResource(R.string.inizia))
-            }
-            Button(onClick = {
-                aggPartite(PartitaEvent.StartLivello)},
+                aggPartite(PartitaEvent.StartPartita)},
+                enabled = !state.isPartitaStarted,
                 modifier = Modifier.padding(horizontal = 10.dp)) {
                 Icon(painter = painterResource(R.drawable.play_arrow_24px),
                     contentDescription = stringResource(R.string.inizia))
             }
 
+            //PAUSA/RIPRENDI
             Button(onClick = {
-                aggPartite(PartitaEvent.SavePartita)
-                onFineClicked()
-            }, modifier = Modifier.padding(horizontal = 10.dp)) {
-                Text( stringResource(R.string.fine))
-            }
-
+                aggPartite(PartitaEvent.PausePartita)},
+                enabled = state.isPartitaStarted,
+                modifier = Modifier.padding(horizontal = 10.dp)) {
+                Icon(painter = painterResource(if (state.isPartitaOnPause){
+                    R.drawable.resume_24px
+                }else{
+                    R.drawable.pause_24px
+                }),
+                    contentDescription = stringResource(if (state.isPartitaOnPause){
+                        R.string.riprendi
+                    }else{
+                        R.string.pausa
+                    })
+                )}
+            //FINE PARTITA
+            Button(onClick = {
+                aggPartite(PartitaEvent.EndPartita)
+                onFineClicked()},
+                enabled = state.isPartitaStarted,
+                modifier = Modifier.padding(horizontal = 10.dp)) {
+                Icon(painter = painterResource(R.drawable.stop_24px),
+                    contentDescription = stringResource(R.string.fine))
+                }
 
 
         }
@@ -199,7 +215,7 @@ fun Landscape_layout(state: PartitaState, onFineClicked: () -> Unit, aggPartite:
                         state = state,
                         isActive = (state.activeButtonIndex == idButton),
                         onPress = {carattere ->
-                            aggPartite(PartitaEvent.TastoGiocoPremuto(carattere))
+                            aggPartite(PartitaEvent.PressedButton(carattere))
                         })
                 }
             }
@@ -237,17 +253,39 @@ fun Landscape_layout(state: PartitaState, onFineClicked: () -> Unit, aggPartite:
                 horizontalArrangement = Arrangement.Absolute.Center
             ) {
 
+                //INIZIO PARTITA
                 Button(onClick = {
-                    aggPartite(PartitaEvent.ResetGioco)},
+                    aggPartite(PartitaEvent.SavePartita)},
+                    enabled = !state.isPartitaStarted,
                     modifier = Modifier.padding(horizontal = 10.dp)) {
-                    Text(stringResource(R.string.canc))
+                    Icon(painter = painterResource(R.drawable.play_arrow_24px),
+                        contentDescription = stringResource(R.string.inizia))
                 }
 
+                //PAUSA/RIPRENDI
                 Button(onClick = {
-                    aggPartite(PartitaEvent.SavePartita)
-                    onFineClicked()
-                }, modifier = Modifier.padding(horizontal = 10.dp)) {
-                    Text( stringResource(R.string.fine))
+                    aggPartite(PartitaEvent.PausePartita)},
+                    enabled = state.isPartitaStarted,
+                    modifier = Modifier.padding(horizontal = 10.dp)) {
+                    Icon(painter = painterResource(if (state.isPartitaOnPause){
+                        R.drawable.resume_24px
+                    }else{
+                        R.drawable.pause_24px
+                    }),
+                        contentDescription = stringResource(if (state.isPartitaOnPause){
+                            R.string.riprendi
+                        }else{
+                            R.string.pausa
+                        })
+                    )}
+                //FINE PARTITA
+                Button(onClick = {
+                    aggPartite(PartitaEvent.EndPartita)
+                    onFineClicked()},
+                    enabled = state.isPartitaStarted,
+                    modifier = Modifier.padding(horizontal = 10.dp)) {
+                    Icon(painter = painterResource(R.drawable.stop_24px),
+                        contentDescription = stringResource(R.string.fine))
                 }
 
 
@@ -331,4 +369,23 @@ fun Elementi_Griglia(id :Int, state : PartitaState,  isActive: Boolean, onPress:
     ){
 
     }
+}
+
+@Preview(showBackground = true, name = "Anteprima Verticale (Portrait)", device = "spec:width=411dp,height=891dp")
+@Preview(showBackground = true, name = "Anteprima Orizzontale (Landscape)", device = "spec:width=891dp,height=411dp")
+@Composable
+fun SchermataPrincipalePreview() {
+    // Simulazione di una partita attiva per testare la resa visiva dei controlli
+    val mockupState = PartitaState(
+        isPartitaStarted = false,
+        isPartitaOnPause = false,
+        playerSeq = "R-G-B",
+        activeButtonIndex = 0, // Illumina il tasto Rosso per verificare l'animazione di transizione
+        cpuPhase = false
+    )
+    SchermataPrincipale(
+        onFineClicked = {},
+        state = mockupState,
+        aggPartite = {}
+    )
 }
